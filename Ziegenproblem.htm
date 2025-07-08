@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ziegenproblem/Monty-Hall-Problem</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+            background-color: #f0f8ff;
+        }
+        h1 {
+            color: #333;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
+        #simulationCount {
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
+        #doors {
+            margin-top: 20px;
+        }
+        .door {
+            width: 100px;
+            height: 200px;
+            display: inline-block;
+            margin: 10px;
+            border: 2px solid #000;
+            position: relative;
+            cursor: pointer;
+            background-color: #e0e0e0;
+            transition: background-color 0.3s;
+        }
+        .door.open {
+            background-color: #ffcccb;
+        }
+        .door.selected {
+            border-color: blue;
+            background-color: #b0e0e6;
+        }
+    </style>
+</head>
+<body>
+    <h1>Ziegenproblem/Monty-Hall-Problem</h1>
+<h2>Rf - Q2 - Schalker Gymnasium </h2>
+    <p>Das berühmte Ziegenproblem ist ein paradoxes Beispiel aus der Wahrscheinlichkeitstheorie. Hinter drei Türen verstecken sich zwei Ziegen und ein Auto. Du wählst eine Tür – der Moderator öffnet eine andere Tür mit einer Ziege. Nun hast du die Wahl: Bleibst du bei deiner Tür oder wechselst du? Diese Simulation zeigt dir Schritt für Schritt, wie sich deine Gewinnchancen verändern.</p>
+
+    <div id="doors">
+        <div class="door" id="door1" onclick="selectDoor(1)">Tür 1</div>
+        <div class="door" id="door2" onclick="selectDoor(2)">Tür 2</div>
+        <div class="door" id="door3" onclick="selectDoor(3)">Tür 3</div>
+    </div>
+
+    <div id="result"></div>
+    <div id="simulationCount"></div>
+    <button id="switchButton" style="display:none;" onclick="switchDoor()">Tür wechseln</button>
+    <button id="stayButton" style="display:none;" onclick="stay()">Bei Tür bleiben</button>
+    <button id="restartButton" style="display:none;" onclick="restart()">Neu starten</button>
+
+    <script>
+        let selectedDoor;
+        let doors = [0, 0, 0]; // 0 = Ziege, 1 = Auto
+        let openedDoor;
+        let carDoor;
+        let autoWins = 0;
+        let goatWins = 0;
+        let totalSimulations = 0;
+
+        function initializeDoors() {
+            doors = [0, 0, 0];
+            carDoor = Math.floor(Math.random() * 3);
+            doors[carDoor] = 1; // Setze eine Tür mit dem Auto
+        }
+
+        function selectDoor(doorNumber) {
+            if (selectedDoor) return; // Verhindere Mehrfachauswahl
+            selectedDoor = doorNumber;
+            document.getElementById(`door${doorNumber}`).classList.add('selected');
+
+            // Moderator öffnet eine Tür mit einer Ziege
+            openedDoor = (selectedDoor % 3) + 1; // Nächste Tür
+            while (openedDoor === selectedDoor || doors[openedDoor - 1] === 1) {
+                openedDoor = (openedDoor % 3) + 1; // Nächste Tür
+            }
+            document.getElementById(`door${openedDoor}`).classList.add('open');
+
+            // Buttons anzeigen
+            document.getElementById('switchButton').style.display = 'inline';
+            document.getElementById('stayButton').style.display = 'inline';
+        }
+
+        function switchDoor() {
+            selectedDoor = 6 - selectedDoor - openedDoor; // Berechne die andere Tür
+            showResult();
+        }
+
+        function stay() {
+            showResult();
+        }
+
+        function showResult() {
+            const resultText = doors[selectedDoor - 1] === 1 ? 
+                "Herzlichen Glückwunsch! Du hast das Auto gewonnen! 🚗" : 
+                "Du hast eine Ziege gewonnen. 🐐 Versuch es noch einmal!";
+            document.getElementById('result').innerText = resultText;
+
+            // Zähle die Gewinne
+            if (doors[selectedDoor - 1] === 1) {
+                autoWins++;
+            } else {
+                goatWins++;
+            }
+            totalSimulations++;
+
+            // Aktualisiere die Anzeige der Simulationsergebnisse
+            document.getElementById('simulationCount').innerText = `Auto gewonnen: ${autoWins}, Ziege gewonnen: ${goatWins}`;
+
+            // Blende die Auswahl-Buttons aus und zeige nur den Neustart-Button
+            document.getElementById('switchButton').style.display = 'none';
+            document.getElementById('stayButton').style.display = 'none';
+            document.getElementById('restartButton').style.display = 'inline';
+
+            // Türen zurücksetzen
+            document.getElementById(`door${openedDoor}`).innerText = "Tür geöffnet";
+            document.getElementById(`door${openedDoor}`).style.pointerEvents = 'none';
+        }
+
+        function restart() {
+            selectedDoor = null;
+            openedDoor = null;
+            document.getElementById('result').innerText = '';
+            document.getElementById('simulationCount').innerText = '';
+            document.getElementById('restartButton').style.display = 'none';
+            document.querySelectorAll('.door').forEach(door => {
+                door.classList.remove('open', 'selected');
+                door.innerText = `Tür ${door.id.charAt(door.id.length - 1)}`;
+                door.style.pointerEvents = 'auto';
+            });
+            initializeDoors();
+        }
+
+        // Initialisiere die Türen beim Laden der Seite
+        window.onload = initializeDoors;
+    </script>
+</body>
+</html>
